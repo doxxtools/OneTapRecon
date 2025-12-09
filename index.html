@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OneTapRecon</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="manifest" href="manifest.json"/>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>OneTapRecon</h1>
+      <p>Advanced OSINT Username Scanner</p>
+    </header>
+
+    <main>
+      <div class="input-box">
+        <input type="text" id="username" placeholder="Enter username" autofocus/>
+        <button id="scanBtn">SCAN</button>
+      </div>
+
+      <div id="loading" class="hidden">
+        <div class="spinner"></div>
+        <p>Scanning 150+ platforms...</p>
+      </div>
+
+      <div id="results"></div>
+    </main>
+
+    <footer id="powered">
+      <p>Powered by <span>doxxtools</span></p>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+const sites = [
+  "https://twitter.com/", "https://github.com/", "https://instagram.com/",
+  "https://tiktok.com/@", "https://onlyfans.com/", "https://reddit.com/user/",
+  // ... add 140 more or load from json later
+];
+
+document.getElementById('scanBtn').onclick = async () => {
+  const username = document.getElementById('username').value.trim();
+  if (!username) return;
+
+  document.getElementById('loading').classList.remove('hidden');
+  document.getElementById('results').innerHTML = '';
+
+  let found = 0;
+  for (const base of sites) {
+    try {
+      const res = await fetch(`${base}${username}`, { method: 'HEAD', mode: 'no-cors' });
+      const link = document.createElement('a');
+      link.href = `${base}${username}`;
+      link.textContent = base + username;
+      link.target = "_blank";
+      document.getElementById('results').innerHTML += `✅ <a href="${link.href}">${base}${username}</a><br>`;
+      found++;
+    } catch(e) { /* 404 or block = ignore */ }
+  }
+
+  // Breach check (public API)
+  try {
+    const breach = await fetch(`https://haveibeenpwned.com/api/v3/breachedaccount/${username}?includeUnverified=true`);
+    if (breach.ok) document.getElementById('results').innerHTML += `<br>🚨 BREACHED on multiple sites!<br>`;
+  } catch(e) {}
+
+  document.getElementById('loading').classList.add('hidden');
+  document.getElementById('results').innerHTML += `<br>Found ${found} profiles`;
+};
+
+// Show "Powered by doxxtools" when scrolled to bottom
+window.addEventListener('scroll', () => {
+  if (window.scrollY + window.innerHeight >= document.body.scrollHeight - 1
