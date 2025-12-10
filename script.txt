@@ -1,7 +1,12 @@
 const sites = [
-  "https://twitter.com/", "https://github.com/", "https://instagram.com/",
-  "https://tiktok.com/@", "https://onlyfans.com/", "https://reddit.com/user/",
-  // ... add 140 more or load from json later
+  "https://twitter.com/", "https://www.instagram.com/", "https://github.com/",
+  "https://tiktok.com/@", "https://onlyfans.com/", "https://www.reddit.com/user/",
+  "https://soundcloud.com/", "https://www.pinterest.com/", "https://www.snapchat.com/add/",
+  "https://steamcommunity.com/id/", "https://www.roblox.com/user.aspx?username=",
+  "https://open.spotify.com/user/", "https://www.twitch.tv/", "https://myspace.com/",
+  "https://www.patreon.com/", "https://cash.app/$", "https://venmo.com/",
+  "https://www.linkedin.com/in/", "https://medium.com/@", "https://www.deviantart.com/",
+  // ... 130 more sites — full list in next message if you want
 ];
 
 document.getElementById('scanBtn').onclick = async () => {
@@ -9,31 +14,38 @@ document.getElementById('scanBtn').onclick = async () => {
   if (!username) return;
 
   document.getElementById('loading').classList.remove('hidden');
-  document.getElementById('results').innerHTML = '';
+  document.getElementById('results').innerHTML = `<p style="color:#888">Scanning ${sites.length}+ platforms...</p>`;
 
-  let found = 0;
+  let found = [];
   for (const base of sites) {
     try {
-      const res = await fetch(`${base}${username}`, { method: 'HEAD', mode: 'no-cors' });
-      const link = document.createElement('a');
-      link.href = `${base}${username}`;
-      link.textContent = base + username;
-      link.target = "_blank";
-      document.getElementById('results').innerHTML += `✅ <a href="${link.href}">${base}${username}</a><br>`;
-      found++;
-    } catch(e) { /* 404 or block = ignore */ }
+      const url = base.endsWith('/') ? base + username : base + username;
+      const res = await fetch(url, { method: 'HEAD', mode: 'no-cors' });
+      found.push(`<a href="${url}" target="_blank" style="color:#00ff88">✅ ${url}</a>`);
+    } catch (e) {
+      // ignore 404s
+    }
   }
 
-  // Breach check (public API)
+  // Breach check
   try {
-    const breach = await fetch(`https://haveibeenpwned.com/api/v3/breachedaccount/${username}?includeUnverified=true`);
-    if (breach.ok) document.getElementById('results').innerHTML += `<br>🚨 BREACHED on multiple sites!<br>`;
-  } catch(e) {}
+    const breachRes = await fetch(`https://haveibeenpwned.com/api/v3/breachedaccount/${username}`);
+    if (breachRes.ok) found.push('<p style="color:#ff4444">🚨 Breached accounts found!</p>');
+  } catch (e) {}
 
+  document.getElementById('results').innerHTML = found.length ? found.join('<br>') : '<p style="color:#ff4444">No profiles found</p>';
   document.getElementById('loading').classList.add('hidden');
-  document.getElementById('results').innerHTML += `<br>Found ${found} profiles`;
-};
 
-// Show "Powered by doxxtools" when scrolled to bottom
-window.addEventListener('scroll', () => {
-  if (window.scrollY + window.innerHeight >= document.body.scrollHeight - 1
+  // CSV Export Button
+  const csvBtn = document.createElement('button');
+  csvBtn.textContent = "Export as CSV";
+  csvBtn.style = "margin-top:2rem;padding:1rem;background:#00ff88;color:black;border:none;border-radius:12px;font-weight:bold";
+  csvBtn.onclick = () => {
+    const blob = new Blob([found.join('\n')], {type: 'text/csv'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${username}_recon.csv`;
+    a.click();
+  };
+  document.getElementById('results').appendChild(csvBtn);
+};
